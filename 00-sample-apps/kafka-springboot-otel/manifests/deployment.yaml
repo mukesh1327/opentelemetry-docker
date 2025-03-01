@@ -1,0 +1,64 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+
+  name: kafka-springboot
+
+  namespace: observability-testcases
+  labels:
+    app: kafka-springboot
+    app.kubernetes.io/component: kafka-springboot
+    app.kubernetes.io/instance: kafka-springboot
+    app.kubernetes.io/name: kafka-springboot
+    app.kubernetes.io/part-of: sample-app
+    app.openshift.io/runtime: spring-boot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-springboot
+      app.kubernetes.io/component: kafka-springboot
+      app.kubernetes.io/instance: kafka-springboot
+      app.kubernetes.io/name: kafka-springboot
+      app.kubernetes.io/part-of: sample-app
+  template:
+    metadata:
+
+      labels:
+        app: kafka-springboot
+        app.kubernetes.io/component: kafka-springboot
+        app.kubernetes.io/instance: kafka-springboot
+        app.kubernetes.io/name: kafka-springboot
+        app.kubernetes.io/part-of: sample-app
+
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: 'true'
+
+    spec:
+      containers:
+        - name: kafka-springboot
+          image: 'quay.io/mugicoder13/sample-kafka-springboot:v1'
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: KAFKA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-springboot
+                  key: KAFKA_URL
+            - name: KAFKA_TOPIC_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-springboot
+                  key: KAFKA_TOPIC_NAME
+            - name: KAFKA_GROUP_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-springboot
+                  key: KAFKA_GROUP_ID
+
+          resources: {}
+
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always

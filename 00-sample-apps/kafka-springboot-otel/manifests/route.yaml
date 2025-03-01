@@ -1,0 +1,22 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: kafka-springboot
+  namespace: observability-testcases
+
+  labels:
+    app: kafka-springboot
+    app.kubernetes.io/component: kafka-springboot
+    app.kubernetes.io/instance: kafka-springboot
+    app.kubernetes.io/name: kafka-springboot
+    app.kubernetes.io/part-of: sample-app
+
+spec:
+  subdomain: kafka-springboot
+  to:
+    kind: Service
+    name: kafka-springboot
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  wildcardPolicy: None

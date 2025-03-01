@@ -1,0 +1,98 @@
+# kind: ConfigMap
+# apiVersion: v1
+# metadata:
+#   name: kafka-springboot
+# data:
+#   KAFKA_URL: 'observai-kafka-bootstrap.observability-kafka.svc.cluster.local:9092'
+
+# ---
+
+# kind: Deployment
+# apiVersion: apps/v1
+# metadata:
+#   name: kafka-springboot
+#   labels:
+#     app: kafka-springboot
+#     app.kubernetes.io/component: kafka-springboot
+#     app.kubernetes.io/instance: kafka-springboot
+#     app.kubernetes.io/name: kafka-springboot
+#     app.kubernetes.io/part-of: sample-app
+#     app.openshift.io/runtime: quarkus
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: kafka-springboot
+#   template:
+#     metadata:
+#       labels:
+#         app: kafka-springboot
+#         deployment: kafka-springboot
+#       annotations:
+#         instrumentation.opentelemetry.io/inject-java: 'true'
+#     spec:
+#       containers:
+#         - name: kafka-springboot
+#           image: 'quay.io/zagaos/kafka-observ-testcase:new'
+#           ports:
+#             - containerPort: 8080
+#               protocol: TCP
+#           env:
+#             - name: KAFKA_URL
+#               valueFrom:
+#                 configMapKeyRef:
+#                   name: kafka-springboot
+#                   key: KAFKA_URL
+#           resources:
+#             limits:
+#               cpu: 520m
+#               memory: 750Mi
+#             requests:
+#               cpu: 500m
+#               memory: 700Mi
+#       imagePullSecrets:
+#         - name: zaga-quay-secret
+
+# --- 
+
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: kafka-springboot
+#   labels:
+#     app: kafka-springboot
+#     app.kubernetes.io/component: kafka-springboot
+#     app.kubernetes.io/instance: kafka-springboot
+#     app.kubernetes.io/name: kafka-springboot
+#     app.kubernetes.io/part-of: sample-app
+# spec:
+#   ports:
+#     - name: 8080-tcp
+#       protocol: TCP
+#       port: 8080
+#       targetPort: 8080
+#   type: ClusterIP
+#   selector:
+#     app: kafka-springboot
+#     deployment: kafka-springboot
+
+# --- 
+
+# kind: Route
+# apiVersion: route.openshift.io/v1
+# metadata:
+#   name: kafka-springboot
+#   labels:
+#     app: kafka-springboot
+#     app.kubernetes.io/component: kafka-springboot
+#     app.kubernetes.io/instance: kafka-springboot
+#     app.kubernetes.io/name: kafka-springboot
+#     app.kubernetes.io/part-of: sample-app
+# spec:
+#   to:
+#     kind: Service
+#     name: kafka-springboot
+#     weight: 100
+#   port:
+#     targetPort: 8000-tcp
+#   wildcardPolicy: None

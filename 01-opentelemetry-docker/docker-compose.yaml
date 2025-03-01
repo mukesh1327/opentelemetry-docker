@@ -1,0 +1,47 @@
+version: "3.8"
+services:
+
+# Zookeeper
+  zookeeper:
+    image: docker.io/confluentinc/cp-zookeeper:latest
+    container_name: confluent-kafka_zookeeper
+    env_file:
+      - ./values.env
+    network_mode: "host"
+    restart: unless-stopped
+
+# Kafka
+  kafka:
+    image: docker.io/confluentinc/cp-kafka:latest
+    container_name: confluent-kafka_broker
+    depends_on:
+      - zookeeper
+    network_mode: "host"
+    restart: unless-stopped
+    env_file:
+      - ./values.env
+
+
+# Kafdrop
+  kafdrop:
+    image: docker.io/obsidiandynamics/kafdrop
+    container_name: kafdrop
+    restart: "no"
+    network_mode: "host"
+    env_file:
+      - ./values.env
+    depends_on:
+      - "zookeeper"
+      - "kafka"
+
+# Opentelemetry
+  otelcol:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.106.1
+    container_name: otel-collector
+    restart: unless-stopped
+    command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
+    user: 0:0
+    privileged: true
+    network_mode: "host"
+    volumes:
+      - ./otel-configs/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml
