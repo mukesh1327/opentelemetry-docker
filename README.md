@@ -3,11 +3,9 @@ List of sample applications
 1. kafka springboot otel
 
 
-List of PoC's
+_How to run_
 
 __1. Opentelemetry-kafka in docker__
-
-___Steps to run___    
 
    ```
    $ cd 01-poc-opentelemetry-docker
